@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
     for change in changes: 
         message = message + change['folder_name'] + "\n"
+        print(change['output'])
     
     toaster.show_toast("Git: Uncommitted changed",
                     message,
