@@ -8,5 +8,6 @@ def get_git_info():
 
     git = cfg.get('GIT','PATH')
     root = cfg.get('SOURCE','PATH')
+    freq = int(cfg.get('APPLICATION','POLL_FREQUENCY'))
     
-    return git, root
+    return git, root, freq
