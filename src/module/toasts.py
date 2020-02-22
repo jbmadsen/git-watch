@@ -12,4 +12,4 @@ def toastMessage(header, message):
     toaster.show_toast(header,
                     message,
                     icon_path="src/assets/python.ico",
-                    duration=15)
+                    duration=7)

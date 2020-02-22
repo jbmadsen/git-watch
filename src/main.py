@@ -1,45 +1,39 @@
 import os
+import time
 import module.git as git
 import module.toasts as toasts
 import module.config as config
 
 
-def get_uncommitted_message(git_path, root_path, repositories):
-    message = "Uncommitted changes in:\n"
-    for folder in repositories:
-        path = os.path.join(root_path, folder)
-        output, _ = git.uncommitted_files(git_path, path) 
-        if output is not b'':
-            message = message + folder + "\n"
-    return message
+def display_git_information(git_path, root_path):
+    '''Get information for all repositories and display status for repositories not up to date
+    
+    git_path    -- path to the git executable (ignore if git is in PATH)
+    root_path   -- root path of your repositories, e.g. ~/git/
+    '''
+    message = git.get_full_repo_status_messages(git_path, root_path)
+    if message:
+        toasts.toastMessage("Git-watch reminder", message)
 
 
-def get_unpushed_message(git_path, root_path, repositories):
-    message = "Unpushed commits in:\n"
-    for folder in repositories:
-        path = os.path.join(root_path, folder)
-        output, _ = git.is_ahead_of_branch(git_path, path) 
-        if output:
-            message = message + folder + "\n"
-    return message
+def main_loop():
+    '''Program main loop that fetches git information at regular intervals'''
+    print('Starting git-watch...')
+    git_path, root_path = config.get_git_info()
+    root_path = os.path.normpath(root_path) 
+
+    try:
+        i = 0
+        while True:
+            if i > 60:
+                print('Fetching repository information...')
+                display_git_information(git_path, root_path)
+                i = 0
+            time.sleep(1)  
+            i = i + 1
+    except KeyboardInterrupt:
+        print('Ending program...')
 
 
 if __name__ == '__main__':
-    git_path, root_path = config.get_git_info()
-    root_path = os.path.normpath(root_path) 
-        
-    repositories = []
-    for item in os.listdir(root_path):
-        path = os.path.join(root_path, item)
-        if not os.path.isfile(path) and git.is_git_folder(git_path, path):
-            repositories.append(item)
-
-    uncommitted = get_uncommitted_message(git_path, root_path, repositories)
-    unpushed = get_unpushed_message(git_path, root_path, repositories)
-    
-    if uncommitted.count('\n') <= 1: uncommitted = ""
-    if unpushed.count('\n') <= 1: unpushed = ""
-
-    message = uncommitted + unpushed
-    toasts.toastMessage("Git-watch reminder", message)
-    pass # end
+    main_loop()

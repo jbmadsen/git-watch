@@ -73,3 +73,36 @@ def is_ahead_of_branch(git_path, path):
     output, err = execute_command(git_path, command)
     output = b'ahead ' in output
     return output, err
+
+
+def get_full_repo_status_messages(git_path, root_path):
+    '''Gets the git status --branch --porcelain from repository at specified path
+
+    Keyword arguments:
+    git_path        -- path to the git executable (ignore if git is in PATH)
+    root_path       -- root path of your repositories, e.g. ~/git/
+    '''
+    repositories = []
+    for item in os.listdir(root_path):
+        path = os.path.join(root_path, item)
+        if not os.path.isfile(path) and is_git_folder(git_path, path):
+            repositories.append(item)
+
+    message = ""
+
+    for folder in repositories:
+        path = os.path.join(root_path, folder)
+        
+        # Check for Unpushed commits
+        output, _ = is_ahead_of_branch(git_path, path) 
+        if output:
+            message = message + folder + " (Unpushed commits)\n"
+            continue
+
+        # Check for Uncommitted changes 
+        output, _ = uncommitted_files(git_path, path) 
+        if output is not b'':
+            message = message + folder + " (Uncommitted changes)\n"
+            continue
+            
+    return message
