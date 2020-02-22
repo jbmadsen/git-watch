@@ -39,7 +39,7 @@ def is_git_folder(git_path, path):
 
 
 def uncommitted_files(git_path, path): 
-    '''Gets the git --porcelain status from repository at specified path
+    '''Gets the git status --porcelain from repository at specified path
 
     Keyword arguments:
     git_path    -- path to the git executable (ignore if git is in PATH)
@@ -48,9 +48,28 @@ def uncommitted_files(git_path, path):
     command = ["git", 
                 "--git-dir=" + os.path.join(path, ".git"), 
                 "--work-tree=" + path, 
-                "status", 
+                "status",
                 "--porcelain"]
 
     output, err = execute_command(git_path, command)
 
+    return output, err
+
+
+def is_ahead_of_branch(git_path, path): 
+    '''Gets the git status --branch --porcelain from repository at specified path
+
+    Keyword arguments:
+    git_path    -- path to the git executable (ignore if git is in PATH)
+    path        -- folder to execute git command at
+    '''
+    command = ["git", 
+                "--git-dir=" + os.path.join(path, ".git"), 
+                "--work-tree=" + path, 
+                "status",
+                "--branch", 
+                "--porcelain"]
+
+    output, err = execute_command(git_path, command)
+    output = b'ahead ' in output
     return output, err
