@@ -1,70 +1,31 @@
-import os 
-import sys
-import subprocess 
-import configparser
-from win10toast import ToastNotifier
-
-
-def git_status(git_path, root_path, folder_name): 
-    '''Gets the git --porcelain status from repository at specified path
-
-    Keyword arguments:
-    git_path    -- path to the git executable (ignore if git is in PATH)
-    root_path   -- path to the root folder containing all repos
-    folder_name -- folder name to look for git changes
-    '''
-    output = ""
-    err = None
-
-    wd = os.getcwd()
-    os.chdir(git_path)
-    
-    try: 
-        root_path = os.path.normpath(root_path)
-        path = os.path.join(root_path, folder_name)
-        p = subprocess.Popen(["git", 
-                              "--git-dir=" + os.path.join(path, ".git"), 
-                              "--work-tree=" + path, 
-                              "status", 
-                              "--porcelain"], 
-                              stdout = subprocess.PIPE)
-        output , err = p.communicate()  
-    except Exception as e:
-        err = str(e)
-    
-    os.chdir(wd)
-    return {"folder_name": folder_name, "output": output, "error": err}
+import os
+import module.git as git
+import module.toasts as toasts
+import module.config as config
 
 
 if __name__ == '__main__':
-    cfg = configparser.ConfigParser()
-    cfg.read_file(open('./config.cfg'))
-
-    git = cfg.get('GIT','PATH')
-    root = cfg.get('SOURCE','PATH')
-
-    toaster = ToastNotifier()
-
+    git_path, root_path = config.get_git_info()
+    root_path = os.path.normpath(root_path) 
+        
     repositories = []
-    for item in os.listdir(root):
-        if not os.path.isfile(os.path.join(root, item)):
+    for item in os.listdir(root_path):
+        path = os.path.join(root_path, item)
+        if not os.path.isfile(path) and git.is_git_folder(git_path, path):
             repositories.append(item)
 
     changes = []
     for folder in repositories:
-        status = git_status(git, root, folder) 
-        if status['output'] is not b'':
-            changes.append(status)
+        path = os.path.join(root_path, folder)
+        output, err = git.uncommitted_files(git_path, path) 
+        if output is not b'':
+            changes.append({'folder_name': folder, 'output': output})
 
     message = "in the following repositories:\n"
 
     for change in changes: 
         message = message + change['folder_name'] + "\n"
-        print(change['output'])
+        print(change)
     
-    toaster.show_toast("Git: Uncommitted changed",
-                    message,
-                    icon_path="src/assets/python.ico",
-                    duration=15)
-    
+    toasts.toastMessage("Git: Uncommitted changed", message)
     pass # end
