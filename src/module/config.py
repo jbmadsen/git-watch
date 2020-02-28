@@ -23,6 +23,7 @@ def find_config_file():
         return os.path.join(os.getcwd(), __config_path__)
     # Reset and return None
     os.chdir(wd)
+    # TODO: Create config file in working directory with default information
     return None
 
 
@@ -61,7 +62,7 @@ def open_config_file():
             os.startfile(cfg)
         except OSError:
             # [Error 22] No application is associated with the specified file for this operation
-            os.system("notepad.exe " + cfg)
+            subprocess.Popen(["notepad.exe", cfg], shell=False)
         except Exception:
             return False
     elif os.name == 'posix':

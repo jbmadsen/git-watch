@@ -15,6 +15,8 @@ a = Analysis(['src\\git-watch.py'],
              cipher=block_cipher,
              noarchive=False)
 
+a.datas += [ ('src/assets/icon.ico', '.\\src\\assets\\icon.ico', 'DATA') ]
+
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(pyz,
@@ -30,7 +32,8 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=True )
+          console=False)
 
 import shutil
 shutil.copyfile('config.cfg', '{0}/config.cfg'.format(DISTPATH))
+

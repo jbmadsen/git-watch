@@ -12,6 +12,12 @@ __root__ = None
 __freq__ = None
 
 
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)    
+    return os.path.join(os.path.abspath("."), relative_path)
+
+
 def get_config_info():
     '''Get config information from config file'''
     global __git__, __root__, __freq__
@@ -44,11 +50,12 @@ def open_settings():
         toasts.toastMessage("Error", "Could not open file: {}".format(config.__config_path__))
 
 
+
 if __name__ == '__main__':
     wd = os.getcwd()
 
     # Load/set parameters
-    icon = os.path.join(os.getcwd(), 'src', 'assets', 'icon.ico')
+    icon = resource_path(os.path.join('src', 'assets', 'icon.ico'))
     menu_def = ['MENU', ['Open settings', 'Exit']]
     git_path, root_path, poll_frequency = get_config_info()
 
