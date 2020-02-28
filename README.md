@@ -5,5 +5,9 @@ Based on Win10toasts:
 https://github.com/jithurjacob/Windows-10-Toast-Notifications
 
 Build using pyinstaller:
-pythinstaller --clean git-watch-build.spec
 
+```sh
+pythinstaller --clean git-watch-build.spec
+```
+
+Or grab the executable and config file from [dist/](./dist/).
